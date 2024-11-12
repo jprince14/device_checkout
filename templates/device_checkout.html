@@ -1,0 +1,160 @@
+<html>
+  <head>
+    <title>Device Checkout Page</title>
+    <link href="https://unpkg.com/gridjs/dist/theme/mermaid.min.css" rel="stylesheet" />
+    <style>
+      body {
+        font-family: Sans-Serif;
+      }
+    </style>
+  </head>
+  <body>
+    <div>
+      <h1>Device Checkout Page</h1>
+
+      <script>
+
+        function confirmReset(fieldName, resetField) {
+            if ( confirm("Are you sure you wish to " + fieldName + " ?") == false ) {
+              return false ;
+            } else {
+              fetch('/api/buttons', {
+              method: 'POST',
+              headers: {'Content-Type': 'application/json'},
+              body: JSON.stringify({
+                "field_name": resetField
+              }),
+            });
+
+            }
+        }
+
+        function deleteDevice(deviceName) {
+            if ( confirm("Are you sure you wish to " + deviceName + " ?") == false ) {
+              return false ;
+            } else {
+              fetch('/api/buttons', {
+              method: 'POST',
+              headers: {'Content-Type': 'application/json'},
+              body: JSON.stringify({
+                "action": "delete",
+                "field_name": deviceName
+              }),
+            });
+
+            }
+        }
+
+
+        </script>
+
+
+      <input type="button" onclick="confirmReset('reset all users', 'user')" value="Reset Users"/>
+      <input type="button" onclick="confirmReset('reset all notes', 'note')" value="Reset Notes"/>
+      <input type="button" onclick="confirmReset('add a new row', 'add_row')" value="Add new row"/>
+      <pre></pre>
+      <input type="text" placeholder="Device name to delete" id="deleteDevice"/>
+      <input type="submit" onclick="deleteDevice( document.getElementById('deleteDevice').value)" value="Delete device"/>
+      <hr>
+      <div id="table"></div>
+    </div>
+    <script src="https://unpkg.com/gridjs/dist/gridjs.umd.js"></script>
+    <script>
+      const tableDiv = document.getElementById('table');
+
+      const updateUrl = (prev, query) => {
+        return prev + (prev.indexOf('?') >= 0 ? '&' : '?') + new URLSearchParams(query).toString();
+      };
+
+      const editableCellAttributes = (data, row, col) => {
+          if (row) {
+            return {contentEditable: 'true', 'data-element-id': row.cells[0].data};
+          }
+          else {
+            return {};
+          }
+      };
+
+      new gridjs.Grid({
+        columns: [
+          { id: 'id', 'hidden': true },
+          { id: 'devName', name: 'Name', 'attributes': editableCellAttributes },
+          { id: 'devIp', name: 'IP Address', sort: false, 'attributes': editableCellAttributes},
+          { id: 'ver', name: 'Version', 'attributes': editableCellAttributes },
+          { id: 'oemVer', name: 'OEM Version', 'attributes': editableCellAttributes },
+          { id: 'user', name: 'Current User',  'attributes': editableCellAttributes },
+          { id: 'note', name: 'Note', sort: false,  'attributes': editableCellAttributes },
+        ],
+        server: {
+          url: '/api/data',
+          then: results => results.data,
+          total: results => results.total,
+        },
+        search: {
+          enabled: true,
+          server: {
+            url: (prev, search) => {
+              return updateUrl(prev, {search});
+            },
+          },
+        },
+        sort: {
+          enabled: true,
+          multiColumn: true,
+          server: {
+            url: (prev, columns) => {
+              const columnIds = ['id', 'devName', 'devIp', 'oemVer', 'ver', 'user', 'note'];
+              const sort = columns.map(col => (col.direction === 1 ? '+' : '-') + columnIds[col.index]);
+              return updateUrl(prev, {sort});
+            },
+          },
+        },
+        pagination: {
+          enabled: true,
+          server: {
+            url: (prev, page, limit) => {
+              return updateUrl(prev, {start: page * limit, length: limit});
+            },
+          },
+        },
+      }).render(tableDiv);
+
+      let savedValue;
+
+      tableDiv.addEventListener('focusin', ev => {
+        if (ev.target.tagName === 'TD') {
+          savedValue = ev.target.textContent;
+        }
+      });
+
+      tableDiv.addEventListener('focusout', ev => {
+        if (ev.target.tagName === 'TD') {
+          if (savedValue !== ev.target.textContent) {
+            fetch('/api/data', {
+              method: 'POST',
+              headers: {'Content-Type': 'application/json'},
+              body: JSON.stringify({
+                id: ev.target.dataset.elementId,
+                [ev.target.dataset.columnId]: ev.target.textContent
+              }),
+            });
+          }
+          savedValue = undefined;
+        }
+      });
+
+      tableDiv.addEventListener('keydown', ev => {
+        if (ev.target.tagName === 'TD') {
+          if (ev.key === 'Escape') {
+            ev.target.textContent = savedValue;
+            ev.target.blur();
+          }
+          else if (ev.key === 'Enter') {
+            ev.preventDefault();
+            ev.target.blur();
+          }
+        }
+      });
+    </script>
+  </body>
+</html>
