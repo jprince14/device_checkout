@@ -13,8 +13,9 @@ class Device(db.Model):
     devIp = db.Column(db.String(64), index=True)
     oemVer = db.Column(db.String(64), index=True)
     ver = db.Column(db.String(64), index=True)
-    user = db.Column(db.String(64))
-    note = db.Column(db.String(256))
+    location = db.Column(db.String(64), index=True)
+    user = db.Column(db.String(64), index=True)
+    note = db.Column(db.String(256), index=True)
 
     def to_dict(self):
         return {
@@ -23,6 +24,7 @@ class Device(db.Model):
             'devIp': self.devIp,
             'oemVer': self.oemVer,
             'ver': self.ver,
+            'location': self.location,
             'user': self.user,
             'note': self.note,
         }
@@ -48,6 +50,7 @@ def data():
             Device.devIp.like(f'%{search}%'),
             Device.oemVer.like(f'%{search}%'),
             Device.ver.like(f'%{search}%'),
+            Device.location.like(f'%{search}%'),
             Device.user.like(f'%{search}%'),
             Device.note.like(f'%{search}%'),
         ))
@@ -61,7 +64,7 @@ def data():
             direction = s[0]
             name = s[1:]
             # Ignore the non-sortable columns
-            if name in ['devIp', "note"]:
+            if name in ["note"]:
                 name = 'name'
             col = getattr(Device, name)
             if direction == '-':
@@ -104,6 +107,7 @@ def buttonsUpdate():
                 oemVer="",
                 ver="",
                 user="",
+                location="",
                 note="",)
             db.session.add(device)
     if "action" in data_json and data_json["action"] == "delete":

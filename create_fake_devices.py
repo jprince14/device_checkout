@@ -12,6 +12,7 @@ def create_fake_devices(n):
                     devIp=faker.text(20),
                     oemVer=faker.text(20),
                     ver=faker.text(20),
+                    location=faker.text(20),
                     user=faker.text(20),
                     note=faker.text(20),)
         db.session.add(device)

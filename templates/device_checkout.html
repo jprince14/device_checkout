@@ -25,8 +25,9 @@
                 "field_name": resetField
               }),
             });
+            my_grid.forceRender();
 
-            }
+             }
         }
 
         function deleteDevice(deviceName) {
@@ -41,11 +42,10 @@
                 "field_name": deviceName
               }),
             });
+            my_grid.forceRender();
 
             }
-        }
-
-
+          }
         </script>
 
 
@@ -75,49 +75,55 @@
           }
       };
 
-      new gridjs.Grid({
-        columns: [
-          { id: 'id', 'hidden': true },
-          { id: 'devName', name: 'Name', 'attributes': editableCellAttributes },
-          { id: 'devIp', name: 'IP Address', sort: false, 'attributes': editableCellAttributes},
-          { id: 'ver', name: 'Version', 'attributes': editableCellAttributes },
-          { id: 'oemVer', name: 'OEM Version', 'attributes': editableCellAttributes },
-          { id: 'user', name: 'Current User',  'attributes': editableCellAttributes },
-          { id: 'note', name: 'Note', sort: false,  'attributes': editableCellAttributes },
-        ],
-        server: {
-          url: '/api/data',
-          then: results => results.data,
-          total: results => results.total,
-        },
-        search: {
-          enabled: true,
+      function get_grid()
+      {
+        return new gridjs.Grid({
+          columns: [
+            { id: 'id', 'hidden': true },
+            { id: 'devName', name: 'Name', 'attributes': editableCellAttributes },
+            { id: 'devIp', name: 'IP Address', 'attributes': editableCellAttributes},
+            { id: 'ver', name: 'Version', 'attributes': editableCellAttributes },
+            { id: 'oemVer', name: 'OEM Version', 'attributes': editableCellAttributes },
+            { id: 'location', name: 'Location', 'attributes': editableCellAttributes },
+            { id: 'user', name: 'Current User',  'attributes': editableCellAttributes },
+            { id: 'note', name: 'Note', sort: false,  'attributes': editableCellAttributes },
+          ],
           server: {
-            url: (prev, search) => {
-              return updateUrl(prev, {search});
+            url: '/api/data',
+            then: results => results.data,
+            total: results => results.total,
+          },
+          search: {
+            enabled: true,
+            server: {
+              url: (prev, search) => {
+                return updateUrl(prev, {search});
+              },
             },
           },
-        },
-        sort: {
-          enabled: true,
-          multiColumn: true,
-          server: {
-            url: (prev, columns) => {
-              const columnIds = ['id', 'devName', 'devIp', 'oemVer', 'ver', 'user', 'note'];
-              const sort = columns.map(col => (col.direction === 1 ? '+' : '-') + columnIds[col.index]);
-              return updateUrl(prev, {sort});
+          sort: {
+            enabled: true,
+            multiColumn: true,
+            server: {
+              url: (prev, columns) => {
+                const columnIds = ['id', 'devName', 'devIp', 'oemVer', 'ver', 'user', 'note'];
+                const sort = columns.map(col => (col.direction === 1 ? '+' : '-') + columnIds[col.index]);
+                return updateUrl(prev, {sort});
+              },
             },
           },
-        },
-        pagination: {
-          enabled: true,
-          server: {
-            url: (prev, page, limit) => {
-              return updateUrl(prev, {start: page * limit, length: limit});
+          pagination: {
+            enabled: true,
+            server: {
+              url: (prev, page, limit) => {
+                return updateUrl(prev, {start: page * limit, length: limit});
+              },
             },
           },
-        },
-      }).render(tableDiv);
+        })
+    }
+      var my_grid = get_grid()
+      my_grid.render(tableDiv);
 
       let savedValue;
 
