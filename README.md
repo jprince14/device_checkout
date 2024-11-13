@@ -1,4 +1,2 @@
-This repo is heavily based on the code in this blog post
-
-https://github.com/miguelgrinberg/flask-gridjs
-https://blog.miguelgrinberg.com/post/beautiful-flask-tables-part-2
+This blog post below was used as a starting point for this repo
+- https://blog.miguelgrinberg.com/post/beautiful-flask-tables-part-2
