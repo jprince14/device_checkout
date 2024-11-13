@@ -1,5 +1,8 @@
 from flask import Flask, render_template, request, abort
 from flask_sqlalchemy import SQLAlchemy
+import gevent.pywsgi
+import ssl
+
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///db.sqlite'
@@ -95,12 +98,12 @@ def buttonsUpdate():
             setattr(device, field_name, "")
     elif field_name == "add_row":
         add_row = True
-        for device in Device.query.all():
-            # Check if there is already a blank line
-            if all(((not value) or (key == "id")) for key, value in device.to_dict().items()):
-                # There is already a blank entry, do nothing
-                add_row = False
-                break
+        # for device in Device.query.all():
+        #     # Check if there is already a blank line
+        #     if all(((not value) or (key == "id")) for key, value in device.to_dict().items()):
+        #         # There is already a blank entry, do nothing
+        #         add_row = False
+        #         break
         if add_row:
             device = Device(devName="",
                 devIp="",
@@ -132,4 +135,6 @@ def update():
 
 
 if __name__ == '__main__':
-    app.run()
+
+    app_server = gevent.pywsgi.WSGIServer(("", 5000), app, keyfile='certs/server.key', certfile='certs/server.crt')
+    app_server.serve_forever()

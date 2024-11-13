@@ -15,7 +15,7 @@
       <script>
 
         function confirmReset(fieldName, resetField) {
-            if ( confirm("Are you sure you wish to " + fieldName + " ?") == false ) {
+            if ( confirm("Are you sure you wish to " + fieldName + "?") == false ) {
               return false ;
             } else {
               fetch('/api/buttons', {
@@ -31,7 +31,7 @@
         }
 
         function deleteDevice(deviceName) {
-            if ( confirm("Are you sure you wish to " + deviceName + " ?") == false ) {
+            if ( confirm("Are you sure you wish to delete all rows with Name \"" + deviceName + "\"?") == false ) {
               return false ;
             } else {
               fetch('/api/buttons', {
