@@ -136,5 +136,5 @@ def update():
 
 if __name__ == '__main__':
 
-    app_server = gevent.pywsgi.WSGIServer(("", 5000), app, keyfile='certs/server.key', certfile='certs/server.crt')
+    app_server = gevent.pywsgi.WSGIServer(("", 443), app, keyfile='certs/server.key', certfile='certs/server.crt')
     app_server.serve_forever()
