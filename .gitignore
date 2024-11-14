@@ -1,2 +1,2 @@
-db.sqlite
 venv/*
+certs/*

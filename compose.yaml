@@ -1,0 +1,6 @@
+services:
+ device_checkout:
+   image: device_checkout
+   ports:
+     - 5000:443
+   build: .

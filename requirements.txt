@@ -2,4 +2,4 @@ Flask==2.0.1
 Flask-SQLAlchemy==2.5.1
 SQLAlchemy==1.4.18
 Werkzeug==2.0.1
-gevent=24.11.1
+gevent==24.11.1
