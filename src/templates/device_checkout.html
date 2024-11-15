@@ -22,12 +22,24 @@
               method: 'POST',
               headers: {'Content-Type': 'application/json'},
               body: JSON.stringify({
-                "field_name": resetField
+                "field_name": resetField,
+                "action": "reset_field",
               }),
             });
             my_grid.forceRender();
 
              }
+        }
+
+        function addRow() {
+            fetch('/api/buttons', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({
+              "action": "add_row",
+            }),
+          });
+          my_grid.forceRender();
         }
 
         function deleteDevice(deviceName) {
@@ -51,7 +63,7 @@
 
       <input type="button" onclick="confirmReset('reset all users', 'user')" value="Reset Users"/>
       <input type="button" onclick="confirmReset('reset all notes', 'note')" value="Reset Notes"/>
-      <input type="button" onclick="confirmReset('add a new row', 'add_row')" value="Add new row"/>
+      <input type="button" onclick="addRow()" value="Add new row"/>
       <pre></pre>
       <input type="text" placeholder="Device name to delete" id="deleteDevice"/>
       <input type="submit" onclick="deleteDevice( document.getElementById('deleteDevice').value)" value="Delete device"/>
@@ -75,6 +87,20 @@
           }
       };
 
+      function confirm_reset_row(row_id, field_name)
+      {
+        fetch('/api/buttons', {
+              method: 'POST',
+              headers: {'Content-Type': 'application/json'},
+              body: JSON.stringify({
+                "action": "reset_row",
+                "field_name": field_name,
+                "row_id": row_id
+              }),
+            });
+            my_grid.forceRender();
+      }
+
       function get_grid()
       {
         return new gridjs.Grid({
@@ -87,7 +113,21 @@
             { id: 'location', name: 'Location', 'attributes': editableCellAttributes },
             { id: 'user', name: 'Current User',  'attributes': editableCellAttributes },
             { id: 'note', name: 'Note', sort: false,  'attributes': editableCellAttributes },
-          ],
+            { id: 'reset_user', name: '', sort: false,         formatter: (cell, row) => {
+          return gridjs.h('button', {
+            className: 'py-2 mb-4 px-4 border rounded-md text-white bg-blue-600',
+            onClick: () => confirm_reset_row(row.cells[0].data, "user")
+                  }, 'Reset User');
+                }
+              },
+              { id: 'reset_note', name: '', sort: false,         formatter: (cell, row) => {
+          return gridjs.h('button', {
+            className: 'py-2 mb-4 px-4 border rounded-md text-white bg-blue-600',
+            onClick: () => confirm_reset_row(row.cells[0].data, "note")
+                  }, 'Reset Note');
+                }
+              },
+            ],
           server: {
             url: '/api/data',
             then: results => results.data,
@@ -106,7 +146,7 @@
             multiColumn: true,
             server: {
               url: (prev, columns) => {
-                const columnIds = ['id', 'devName', 'devIp', 'oemVer', 'ver', 'user', 'note'];
+                const columnIds = ['id', 'devName', 'devIp', 'ver', 'oemVer', 'location', 'user', 'note'];
                 const sort = columns.map(col => (col.direction === 1 ? '+' : '-') + columnIds[col.index]);
                 return updateUrl(prev, {sort});
               },

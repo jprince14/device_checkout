@@ -1,3 +1,5 @@
+#!/usr/bin/python3
+
 from flask import Flask, render_template, request, abort
 from flask_sqlalchemy import SQLAlchemy
 import gevent.pywsgi
@@ -14,8 +16,8 @@ class Device(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     devName = db.Column(db.String(64), index=True)
     devIp = db.Column(db.String(64), index=True)
-    oemVer = db.Column(db.String(64), index=True)
     ver = db.Column(db.String(64), index=True)
+    oemVer = db.Column(db.String(64), index=True)
     location = db.Column(db.String(64), index=True)
     user = db.Column(db.String(64), index=True)
     note = db.Column(db.String(256), index=True)
@@ -92,30 +94,30 @@ def data():
 @app.route('/api/buttons', methods=['POST'])
 def buttonsUpdate():
     data_json = request.get_json()
-    field_name = data_json["field_name"]
-    if field_name in ["user", "note"]:
-        for device in Device.query.all():
-            setattr(device, field_name, "")
-    elif field_name == "add_row":
+    action = data_json["action"]
+    field_name = data_json.get("field_name")
+    if action == "reset_field":
+        if field_name in ["user", "note"]:
+            for device in Device.query.all():
+                setattr(device, field_name, "")
+    elif action == "add_row":
         add_row = True
-        # for device in Device.query.all():
-        #     # Check if there is already a blank line
-        #     if all(((not value) or (key == "id")) for key, value in device.to_dict().items()):
-        #         # There is already a blank entry, do nothing
-        #         add_row = False
-        #         break
         if add_row:
             device = Device(devName="",
                 devIp="",
                 oemVer="",
                 ver="",
-                user="",
                 location="",
-                note="",)
+                user="",
+                note="",
+                )
             db.session.add(device)
-    if "action" in data_json and data_json["action"] == "delete":
-        Device.query.filter_by(devName=data_json["field_name"]).delete()
-
+    elif action  == "delete":
+        Device.query.filter_by(devName=field_name).delete()
+    elif action == "reset_row":
+        row_id = data_json.get("row_id")
+        rows = Device.query.filter_by(id=row_id)
+        [setattr(row, field_name, "") for row in rows]
     db.session.commit()
     
     return '', 204
@@ -127,7 +129,7 @@ def update():
     if 'id' not in data:
         abort(400)
     device = Device.query.get(data['id'])
-    for field in ['devName', 'devIp', 'oemVer', 'ver', 'user', 'note']:
+    for field in ['devName', 'devIp', 'ver', 'oemVer', 'location', 'user', 'note']:
         if field in data:
             setattr(device, field, data[field])
     db.session.commit()

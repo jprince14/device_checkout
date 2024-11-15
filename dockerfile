@@ -1,7 +1,8 @@
 FROM ubuntu:noble
 
 WORKDIR /opt
-COPY . .
+COPY src/ .
+COPY requirements.txt .
 
 ARG DEBIAN_FRONTEND=noninteractive
 ENV TZ=Etc/UTC
