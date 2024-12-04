@@ -5,6 +5,8 @@ if [ -d "venv" ]; then
 fi
 python3 -m venv venv
 source venv/bin/activate
+python3 -m pip install pip-tools
+pip-compile 
 python3 -m pip install -r requirements.txt
 python3 src/create_empty_database.py
 
